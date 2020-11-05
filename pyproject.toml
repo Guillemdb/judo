@@ -60,6 +60,10 @@ pylint = ["+*", "-D*"] # disable docs by default
 pycodestyle = ["-F401", "-F811"] # disable a check
 pyflakes = ["-*"]           # disable a plugin
 
+[tool.flakehell.exceptions."**/__init__.py"]
+pycodestyle = ["-F401", "-F811"] # disable a check
+pyflakes = ["-F401"]           # disable a plugin
+
 [tool.pylint.master]
 ignore = 'tests'
 load-plugins =' pylint.extensions.docparams'

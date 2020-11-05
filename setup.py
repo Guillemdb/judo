@@ -27,7 +27,7 @@ setup(
     tests_require=["pytest>=5.3.5", "hypothesis>=5.6.0"],
     extras_require={},
     install_requires=[],
-    package_data={"": ["README.md"]},
+    package_data={"": ["README.md"], "judo": ["judo/config.yml"]},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
@@ -38,5 +38,5 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Libraries",
-    ],  # TODO: Add classifiers according to license type
+    ],
 )
