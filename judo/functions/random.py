@@ -2,7 +2,7 @@ import numpy
 
 from judo.judo_backend import Backend, torch
 from judo.data_types import typing
-from judo.judo_tensor import tensor
+from judo.judo_tensor import to_backend
 
 
 class MetaTorchRandomState(type):
@@ -23,25 +23,25 @@ class TorchRandomState(metaclass=MetaTorchRandomState):
     def permutation(x):
         idx = torch.randperm(x.shape[0])
         sample = x[idx].to(Backend.get_device()).detach()
-        return tensor.to_backend(sample)
+        return to_backend(sample)
 
     @staticmethod
     def random_sample(*args, **kwargs):
         sample = torch.rand(*args, **kwargs)
-        return tensor.to_backend(sample)
+        return to_backend(sample)
 
     @staticmethod
     def choice(a, size=None, replace=True, p=None):
-        a = tensor.to_backend(a)
+        a = to_backend(a)
         size = size if size is not None else 1
         if replace:
             size = size if isinstance(size, tuple) else (size,)
-            indices = tensor.to_backend(torch.randint(len(a), size))
+            indices = to_backend(torch.randint(len(a), size))
             samples = a[indices]
         else:
-            indices = tensor.to_backend(torch.randperm(len(a)))[:size]
+            indices = to_backend(torch.randperm(len(a)))[:size]
             samples = a[indices]
-        return tensor.to_backend(samples)
+        return to_backend(samples)
 
     @staticmethod
     def uniform(
@@ -55,7 +55,7 @@ class TorchRandomState(metaclass=MetaTorchRandomState):
             sample = uniform.sample()
         if dtype is not None:
             sample = sample.to(dtype)
-        return tensor.to_backend(sample)
+        return to_backend(sample)
 
     @staticmethod
     def randint(low, high, size=None, dtype=None):
@@ -64,13 +64,13 @@ class TorchRandomState(metaclass=MetaTorchRandomState):
         data = torch.randint(low, high, size)
         if dtype is not None:
             data = data.to(dtype)
-        return tensor.to_backend(data)
+        return to_backend(data)
 
     @staticmethod
     def normal(loc=0, scale=1.0, size=None):
         size = size if size is not None else (1,)
         size = size if isinstance(size, tuple) else (size,)
-        return tensor.to_backend(torch.normal(mean=loc, std=scale, size=size))
+        return to_backend(torch.normal(mean=loc, std=scale, size=size))
 
     @classmethod
     def random(cls, size=None):

@@ -1,13 +1,30 @@
 """Functionality for running fragile in numpy and pytorch."""
 import sys
+from typing import Union
+
 import numpy
 from judo.judo_backend import Backend, torch
 from judo import data_types as _data_types
 from judo.data_types import DATA_TYPE_NAMES, dtype, typing
-from judo.judo_tensor import tensor
+from judo.judo_tensor import (
+    array,
+    as_tensor,
+    astype,
+    copy,
+    tensor,
+    to_backend,
+    to_backend_wrap as __backend_wrap,
+    to_numpy,
+    to_torch,
+)
 from judo.functions.api import API, AVAILABLE_FUNCTIONS
 from judo.functions.hashing import hasher
 from judo.functions.random import random_state
+
+Tensor = Union[numpy.ndarray, torch.Tensor]
+Vector = Union[numpy.ndarray, torch.Tensor]
+Matrix = Union[numpy.ndarray, torch.Tensor]
+Scalar = Union[int, float]
 
 
 def __base_getattr(name):
@@ -23,9 +40,11 @@ def __new_getattr(name):
         return __old_getattr(name)
     except AttributeError as e:
         if Backend.is_numpy():
-            return getattr(numpy, name)
+            val = getattr(numpy, name)
+            return __backend_wrap(val) if callable(val) else val
         elif Backend.is_torch():
-            return getattr(torch, name)
+            val = getattr(torch, name)
+            return __backend_wrap(val) if callable(val) else val
         raise e
 
 

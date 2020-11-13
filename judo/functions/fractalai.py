@@ -33,12 +33,12 @@ def relativize(x: typing.Tensor) -> typing.Tensor:
     x = judo.astype(x, dtype.float)
     std = x.std()
     if float(std) == 0:
-        return tensor.ones(len(x), dtype=orig.dtype)
+        return judo.ones(len(x), dtype=orig.dtype)
     standard = (x - x.mean()) / std
     with numpy.errstate(invalid="ignore", divide="ignore"):
         res = judo.where(standard > 0.0, judo.log(1.0 + standard) + 1.0, judo.exp(standard))
-    # standard[standard > 0] = tensor.log(1.0 + standard[standard > 0]) + 1.0
-    # standard[standard <= 0] = tensor.exp(standard[standard <= 0])
+    # standard[standard > 0] = judo.log(1.0 + standard[standard > 0]) + 1.0
+    # standard[standard <= 0] = judo.exp(standard[standard <= 0])
     return res
 
 
@@ -47,9 +47,7 @@ def get_alive_indexes(oobs: typing.Tensor):
     if judo.all(oobs):
         return judo.arange(len(oobs))
     ix = judo.logical_not(oobs).flatten()
-    return random_state.choice(
-        judo.arange(len(ix))[ix], size=len(ix), replace=ix.sum() < len(ix)
-    )
+    return random_state.choice(judo.arange(len(ix))[ix], size=len(ix), replace=ix.sum() < len(ix))
 
 
 def calculate_distance(
@@ -81,7 +79,7 @@ def calculate_virtual_reward(
 ):
     """Calculate the virtual rewards given the required data."""
 
-    compas = get_alive_indexes(oobs) if oobs is not None else tensor.arange(len(rewards))
+    compas = get_alive_indexes(oobs) if oobs is not None else judo.arange(len(rewards))
     compas = random_state.permutation(compas)
     flattened_observs = observs.reshape(len(oobs), -1)
     other_reward = other_reward.flatten() if dtype.is_tensor(other_reward) else other_reward
@@ -95,14 +93,10 @@ def calculate_virtual_reward(
 
 def calculate_clone(virtual_rewards: typing.Tensor, oobs: typing.Tensor = None, eps=1e-3):
     """Calculate the clone indexes and masks from the virtual rewards."""
-    compas_ix = (
-        get_alive_indexes(oobs) if oobs is not None else tensor.arange(len(virtual_rewards))
-    )
+    compas_ix = get_alive_indexes(oobs) if oobs is not None else judo.arange(len(virtual_rewards))
     compas_ix = random_state.permutation(compas_ix)
     vir_rew = virtual_rewards.flatten()
-    clone_probs = (vir_rew[compas_ix] - vir_rew) / tensor.where(
-        vir_rew > eps, vir_rew, tensor(eps)
-    )
+    clone_probs = (vir_rew[compas_ix] - vir_rew) / judo.where(vir_rew > eps, vir_rew, tensor(eps))
     will_clone = clone_probs.flatten() > random_state.random(len(clone_probs))
     return compas_ix, will_clone
 
@@ -117,7 +111,7 @@ def fai_iteration(
     other_reward: typing.Tensor = 1.0,
 ):
     """Perform a FAI iteration."""
-    oobs = oobs if oobs is not None else tensor.zeros(rewards.shape, dtype=dtype.bool)
+    oobs = oobs if oobs is not None else judo.zeros(rewards.shape, dtype=dtype.bool)
     virtual_reward = calculate_virtual_reward(
         observs,
         rewards,
@@ -143,8 +137,8 @@ def cross_virtual_reward(
     """Calculate the virtual rewards between two cloud of points."""
     host_observs = host_observs.reshape(len(host_rewards), -1)
     ext_observs = ext_observs.reshape(len(ext_rewards), -1)
-    compas_host = random_state.permutation(tensor.arange(len(host_rewards)))
-    compas_ext = random_state.permutation(tensor.arange(len(ext_rewards)))
+    compas_host = random_state.permutation(judo.arange(len(host_rewards)))
+    compas_ext = random_state.permutation(judo.arange(len(ext_rewards)))
 
     # TODO: check if it's better for the distances to be the same for host and ext
     h_dist = distance_function(host_observs, ext_observs[compas_host])
@@ -169,10 +163,10 @@ def cross_clone(
     eps=1e-3,
 ):
     """Perform a clone operation between two different groups of points."""
-    compas_ix = random_state.permutation(tensor.arange(len(ext_virtual_rewards)))
-    host_vr = tensor.astype(host_virtual_rewards.flatten(), dtype=dtype.float32)
-    ext_vr = tensor.astype(ext_virtual_rewards.flatten(), dtype=dtype.float32)
-    clone_probs = (ext_vr[compas_ix] - host_vr) / tensor.where(
+    compas_ix = random_state.permutation(judo.arange(len(ext_virtual_rewards)))
+    host_vr = judo.astype(host_virtual_rewards.flatten(), dtype=dtype.float32)
+    ext_vr = judo.astype(ext_virtual_rewards.flatten(), dtype=dtype.float32)
+    clone_probs = (ext_vr[compas_ix] - host_vr) / judo.where(
         ext_vr > eps, ext_vr, tensor(eps, dtype=dtype.float32)
     )
     will_clone = clone_probs.flatten() > random_state.random(len(clone_probs))

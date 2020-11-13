@@ -2,24 +2,27 @@ from judo import functions
 from judo.judo_backend import Backend
 
 
-AVAILABLE_FUNCTIONS = set([
-    "argmax",
-    "hash_numpy",
-    "hash_tensor",
-    "concatenate",
-    "stack",
-    "clip",
-    "repeat",
-    "min",
-    "max",
-    "norm",
-    "unsqueeze",
-    "where",
-    "sqrt",
-    "tile",
-    "logical_or",
-    "logical_and",
-] + list(functions.fractalai.AVAILABLE_FUNCTIONS))
+AVAILABLE_FUNCTIONS = set(
+    [
+        "argmax",
+        "hash_numpy",
+        "hash_tensor",
+        "concatenate",
+        "stack",
+        "clip",
+        "repeat",
+        "min",
+        "max",
+        "norm",
+        "unsqueeze",
+        "where",
+        "sqrt",
+        "tile",
+        "logical_or",
+        "logical_and",
+    ]
+    + list(functions.fractalai.AVAILABLE_FUNCTIONS)
+)
 
 
 class MetaAPI(type):

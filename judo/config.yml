@@ -1,4 +1,3 @@
-default_backend: numpy
-default_device: cpu
-default_grad: false
+backend: numpy
+copy: false
 true_hash: false

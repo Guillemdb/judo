@@ -1,6 +1,6 @@
 from judo.judo_backend import torch
 from judo.data_types import dtype
-from judo.judo_tensor import tensor
+from judo.judo_tensor import tensor, astype
 
 AVAILABLE_FUNCTIONS = [
     "argmax",
@@ -22,18 +22,26 @@ AVAILABLE_FUNCTIONS = [
 ]
 
 
-def concatenate(x, axis=0, out=None):
+def parse_dim(axis, dim):
+    if axis is not None:
+        return axis
+    return dim
+
+
+def concatenate(x, axis=0, out=None, dim=0):
+    axis = parse_dim(axis, dim)
     return torch.cat(x, dim=axis, out=out)
 
 
-def stack(x, axis=0, out=None):
+def stack(x, axis=0, out=None, dim=0):
+    axis = parse_dim(axis, dim)
     return torch.stack(x, dim=axis, out=out)
 
 
 def clip(x, a_min, a_max, out=None):
 
-    _tensor = min(x, other=tensor.astype(tensor(a_max), dtype=x.dtype))
-    return max(_tensor, other=tensor.astype(tensor(a_min), dtype=x.dtype), out=out)
+    _tensor = min(x, other=astype(tensor(a_max), dtype=x.dtype))
+    return max(_tensor, other=astype(tensor(a_min), dtype=x.dtype), out=out)
 
     _tensor = torch.zeros_like(x)
     if dtype.is_tensor(a_min) and not dtype.is_tensor(a_max):
@@ -54,7 +62,8 @@ def clip(x, a_min, a_max, out=None):
     return _tensor
 
 
-def repeat(x, repeat, axis=None):
+def repeat(x, repeat, axis=None, dim=None):
+    axis = parse_dim(axis, dim)
     return torch.repeat_interleave(x, repeat, dim=axis)
 
 
@@ -62,11 +71,13 @@ def tile(x, repeat):
     return torch.Tensor.repeat(x, *repeat if isinstance(repeat, tuple) else [repeat])
 
 
-def norm(x, ord=None, axis=None, keepdims=False):
+def norm(x, ord=None, axis=None, keepdims=False, dim=None):
+    axis = parse_dim(axis, dim)
     return torch.norm(x, p=ord, dim=axis, keepdim=keepdims)
 
 
-def min(x, axis=None, other=None, out=None):
+def min(x, axis=None, other=None, out=None, dim=None):
+    axis = parse_dim(axis, dim)
     if other is None:
         axis = axis if axis is not None else 0
         val, _ = torch.min(x, dim=axis, out=out)
@@ -74,7 +85,8 @@ def min(x, axis=None, other=None, out=None):
     return torch.min(x, other=other, out=out)
 
 
-def max(x, axis=None, other=None, out=None):
+def max(x, axis=None, other=None, out=None, dim=None):
+    axis = parse_dim(axis, dim)
     if other is None:
         axis = axis if axis is not None else 0
         val, _ = torch.max(x, dim=axis, out=out)
@@ -82,7 +94,8 @@ def max(x, axis=None, other=None, out=None):
     return torch.max(x, other=other, out=out)
 
 
-def unsqueeze(x, axis=0):
+def unsqueeze(x, axis=0, dim=0):
+    axis = parse_dim(axis, dim)
     return x.unsqueeze(axis)
 
 
@@ -98,7 +111,8 @@ def where(cond, a, b, *args, **kwargs):
     return res.to(dtype.bool) if was_bool else res
 
 
-def argmax(x, axis=None, *args, **kwargs):
+def argmax(x, axis=None, dim=None, *args, **kwargs):
+    axis = parse_dim(axis, dim)
     # where not implemented for bool in
     axis = axis if axis is not None else 0
     was_bool = False

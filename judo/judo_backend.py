@@ -23,27 +23,38 @@ except ImportError:
         random = torch_random
 
 
+FALLBACK_DEFAULTS = {
+    "backend": "numpy",
+    "device": "auto",
+    "requires_grad": None,
+    "true_hash": True,
+    "copy": False,
+}
 config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
 
 
 def load_backend_config(filepath=config_file):
     with open(filepath, "r") as stream:
         config = yaml.safe_load(stream)
-    backend = config["default_backend"]
-    device = config["default_device"]
+    backend = config.get("backend", FALLBACK_DEFAULTS["backend"])
+    device = config.get("device", FALLBACK_DEFAULTS["device"])
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
-    use_grad = config["default_grad"]
-    true_hash = config["true_hash"]
-    return backend, device, use_grad, true_hash
+    elif device.lower() == "none":
+        device = None
+    requires_grad = config.get("requires_grad", FALLBACK_DEFAULTS["requires_grad"])
+    true_hash = config.get("true_hash", FALLBACK_DEFAULTS["true_hash"])
+    copy = config.get("copy", FALLBACK_DEFAULTS["copy"])
+    return backend, device, requires_grad, true_hash, copy
 
 
 def update_backend_config(
     backend: str = None,
     device: str = None,
-    use_grad: bool = None,
+    requires_grad: bool = None,
     filepath=config_file,
     true_hash: bool = None,
+    copy: bool = None,
 ):
     with open(filepath, "r") as stream:
         config = yaml.safe_load(stream)
@@ -53,20 +64,22 @@ def update_backend_config(
         config["default_backend"] = backend
     if device is not None:
         config["default_device"] = device
-    if use_grad is not None:
-        config["default_grad"] = use_grad
+    if requires_grad is not None:
+        config["requires_grad"] = requires_grad
     if true_hash is not None:
         config["true_hash"] = true_hash
+    if copy is not None:
+        config["copy"] = copy
     with open(filepath, "w") as outfile:
         yaml.dump(config, outfile)
 
 
 @contextmanager
-def _use_backend(cls, name, device=None, use_grad=None):
+def _use_backend(cls, name, device=None, requires_grad=None, copy=None):
     if name is not None:
         cls._check_valid_backend(name)
     curr_state = cls.get_backend_state()
-    cls.set_backend(name=name, device=device, use_grad=use_grad)
+    cls.set_backend(name=name, device=device, requires_grad=requires_grad, copy=copy)
     try:
         yield
     finally:
@@ -74,29 +87,31 @@ def _use_backend(cls, name, device=None, use_grad=None):
 
 
 @contextmanager
-def use_backend(name, device=None, use_grad=None):
+def use_backend(name, device=None, requires_grad=None):
     if name is not None:
         Backend._check_valid_backend(name)
     curr_state = Backend.get_backend_state()
-    Backend.set_backend(name=name, device=device, use_grad=use_grad)
+    Backend.set_backend(name=name, device=device, requires_grad=requires_grad)
     try:
         yield
     finally:
         Backend.set_backend(**curr_state)
 
 
-_backend, _device, _use_grad, _true_hash = load_backend_config()
-_backend, _device, _use_grad, _true_hash = (
+_backend, _device, _requires_grad, _true_hash, _copy = load_backend_config()
+_backend, _device, _requires_grad, _true_hash, _copy = (
     str(_backend),
-    str(_device),
-    bool(_use_grad),
+    str(_device) if _device is not None else None,
+    bool(_requires_grad) if _requires_grad is not None else None,
     bool(_true_hash),
+    bool(_copy),
 )
 
 
 class Backend:
     AVAILABLE_BACKENDS = ["numpy", "torch"]
-    _backend, _device, _use_grad, _true_hash = _backend, _device, _use_grad, _true_hash
+    _backend, _device, _requires_grad, _true_hash = _backend, _device, _requires_grad, _true_hash
+    _copy = _copy
 
     @classmethod
     def _check_valid_backend(cls, name):
@@ -109,8 +124,10 @@ class Backend:
     def get_backend_state(cls):
         state = {
             "name": str(cls._backend),
-            "device": str(cls._device),
-            "use_grad": bool(cls._use_grad),
+            "device": str(cls._device) if cls._device is not None else None,
+            "requires_grad": bool(cls._requires_grad) if cls._requires_grad is not None else None,
+            "true_hash": bool(cls._true_hash),
+            "copy": bool(cls._copy),
         }
         return state
 
@@ -120,11 +137,13 @@ class Backend:
 
     @classmethod
     def get_device(cls):
-        return str(cls._device)
+        if cls._device is not None:
+            return str(cls._device)
+        return None
 
     @classmethod
-    def use_grad(cls):
-        return cls._use_grad
+    def requires_grad(cls):
+        return cls._requires_grad
 
     @classmethod
     def use_true_hash(cls):
@@ -135,25 +154,47 @@ class Backend:
         cls,
         name=None,
         device=None,
-        use_grad: bool = None,
-        set_backend: bool = True,
+        requires_grad: bool = None,
+        copy: bool = None,
         true_hash: bool = None,
+        set_backend: bool = True,
     ):
-        update_backend_config(backend=name, device=device, use_grad=use_grad, true_hash=true_hash)
+        update_backend_config(
+            backend=name,
+            device=device,
+            requires_grad=requires_grad,
+            true_hash=true_hash,
+            copy=copy,
+        )
         if set_backend:
-            cls.set_backend(name, device, use_grad)
-            if true_hash is not None:
-                cls._true_hash = true_hash
+            cls.set_backend(
+                name=name,
+                device=device,
+                requires_grad=requires_grad,
+                copy=copy,
+                true_hash=true_hash,
+            )
 
     @classmethod
-    def set_backend(cls, name=None, device=None, use_grad: bool = None):
+    def set_backend(
+        cls,
+        name=None,
+        device=None,
+        requires_grad: bool = None,
+        copy: bool = None,
+        true_hash: bool = None,
+    ):
         if name is not None:
             cls._check_valid_backend(name)
             cls._backend = name
         if device is not None:
             cls._device = device
-        if use_grad is not None:
-            cls._use_grad = use_grad
+        if requires_grad is not None:
+            cls._requires_grad = requires_grad
+        if copy is not None:
+            cls._copy = copy
+        if true_hash is not None:
+            cls._true_hash = true_hash
 
     @classmethod
     def is_numpy(cls):
@@ -164,39 +205,33 @@ class Backend:
         return cls._backend == "torch"
 
     @classmethod
+    def can_use_cuda(cls):
+        return cls.is_torch() and cls._device != "cpu"
+
+    @classmethod
     def execute(cls, value, funcs):
         backend = cls.get_current_backend()
         return funcs[backend](value)
 
     @classmethod
-    def use_backend(cls, name=None, device=None, use_grad=None):
-        return _use_backend(cls, name=name, device=device, use_grad=use_grad)
+    def use_backend(cls, name=None, device=None, requires_grad=None, copy=None):
+        return _use_backend(cls, name=name, device=device, requires_grad=requires_grad, copy=copy)
 
     @classmethod
     def reset_state(cls):
-        global _backend, _device, _use_grad, _true_hash
-        _backend, _device, _use_grad, _true_hash = load_backend_config()
-        _backend, _device, _use_grad, _true_hash = (
+        global _backend, _device, _requires_grad, _true_hash, _copy
+        _backend, _device, _requires_grad, _true_hash, _copy = load_backend_config()
+        _backend, _device, _requires_grad, _true_hash, _copy = (
             str(_backend),
-            str(_device),
-            bool(_use_grad),
+            str(_device) if _device is not None else None,
+            bool(_requires_grad) if _requires_grad is not None else None,
             bool(_true_hash),
+            bool(_copy),
         )
-        cls._backend, cls._device, cls._use_grad, cls._true_hash = (
+        cls._backend, cls._device, cls._requires_grad, cls._true_hash, cls._copy = (
             _backend,
             _device,
-            _use_grad,
+            _requires_grad,
             _true_hash,
+            _copy,
         )
-
-
-def load_backend_config(filepath=config_file):
-    with open(filepath, "r") as stream:
-        config = yaml.safe_load(stream)
-    backend = config["default_backend"]
-    device = config["default_device"]
-    if device == "auto":
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-    use_grad = config["default_grad"]
-    true_hash = config["true_hash"]
-    return backend, device, use_grad, true_hash

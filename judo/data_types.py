@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Union
+from typing import Union
 
 import numpy
 
@@ -17,6 +17,10 @@ DATA_TYPE_NAMES = {
     "float64",
     "hash_type",
 }
+
+_int = int
+_bool = bool
+_float = float
 
 
 def bool():
@@ -126,58 +130,49 @@ class MetaScalar(type):
 class dtype(metaclass=MetaScalar):
     @classmethod
     def is_bool(cls, x):
-        dtypes = (bool, dtype.bool)
+        dtypes = (_bool, dtype.bool)
         if cls.is_tensor(x):
             return x.dtype in dtypes
         return isinstance(x, dtypes)
 
     @classmethod
     def is_float(cls, x):
-        dtypes = (float, cls.float64, cls.float32, cls.float16)
+        dtypes = (_float, cls.float64, cls.float32, cls.float16)
         if cls.is_tensor(x):
             return x.dtype in dtypes
         return isinstance(x, dtypes)
 
     @classmethod
     def is_int(cls, x):
-        dtypes = (int, dtype.int64, dtype.int32, dtype.int16)
+        dtypes = (_int, dtype.int64, dtype.int32, dtype.int16)
         if cls.is_tensor(x):
             return x.dtype in dtypes
         return isinstance(x, dtypes)
 
     @classmethod
     def is_tensor(cls, x):
-        from judo.judo_tensor import tensor
-
-        return isinstance(x, tensor.type)  # or cls.is_hash_tensor(x)
-
-    @classmethod
-    def to_node_id(cls, x):
-        if Backend.is_numpy():
-            return str(x) if Backend.use_true_hash() else int(x)
-        elif Backend.is_torch():
-            return int(x)
+        return isinstance(x, (numpy.ndarray, torch.Tensor))  # or cls.is_hash_tensor(x)
 
 
 class MetaTyping(type):
     @property
     def int(self):
         try:
-            return Union[int, dtype.int64, dtype.int32, dtype.int16]
+            return Union[_int, dtype.int64, dtype.int32, dtype.int16]
         except Exception:
             return int
 
     @property
     def float(self):
         try:
-            return Union[float, dtype.float64, dtype.float32, dtype.float16]
+            return Union[_float, dtype.float64, dtype.float32, dtype.float16]
         except Exception:
             return float
 
     @property
     def bool(self):
         try:
-            return Union[bool, dtype.bool]
+            return Union[_bool, dtype.bool]
         except Exception:
             return bool
 
@@ -186,10 +181,8 @@ class MetaTyping(type):
         try:
             return Union[self.float, self.int]
         except Exception:
-            return Union[int, float]
+            return Union[_int, float]
 
 
 class typing(metaclass=MetaTyping):
     Tensor = Union[numpy.ndarray, torch.Tensor]
-    StateDict = Dict[str, Dict[str, Any]]
-    DistanceFunction = Callable[[numpy.ndarray, numpy.ndarray], numpy.ndarray]
