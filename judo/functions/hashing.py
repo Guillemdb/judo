@@ -1,11 +1,13 @@
-from multiprocessing.pool import Pool
+try:
+    from torch.multiprocessing.pool import Pool
+except ImportError:
+    from multiprocessing.pool import Pool
 
 import numpy
 import xxhash
 
-
+import judo
 from judo.judo_backend import Backend
-from judo.judo_tensor import tensor
 
 
 class Hasher:
@@ -29,7 +31,7 @@ class Hasher:
 
     @staticmethod
     def hash_torch(x):
-        bytes = tensor.to_numpy(x).tobytes()
+        bytes = judo.to_numpy(x).tobytes()
         return xxhash.xxh32_intdigest(bytes)
 
     @classmethod
@@ -47,7 +49,7 @@ class Hasher:
     def get_array_of_ids(self, n: int):
         ids = numpy.arange(n) + self._seed + 1
         self._seed += n + 1
-        return tensor.as_tensor(ids)
+        return judo.as_tensor(ids)
 
     def hash_tensor(self, x):
         if self._true_hash:
@@ -58,7 +60,7 @@ class Hasher:
         if self._true_hash:
             # hashes = self.pool.map(self.true_hash_tensor, x)
             hashes = [self.true_hash_tensor(x_i) for x_i in x]
-            return tensor.as_tensor(hashes)
+            return judo.as_tensor(hashes)
         return self.get_array_of_ids(x.shape[0])
 
     def hash_state(self, state):
