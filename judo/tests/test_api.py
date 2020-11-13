@@ -1,5 +1,4 @@
 import pytest
-import numpy
 
 import judo
 from judo.tests.test_backend import backend

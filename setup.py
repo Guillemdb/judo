@@ -26,7 +26,7 @@ setup(
     keywords=["Machine learning", "artificial intelligence"],
     tests_require=["pytest>=5.3.5", "hypothesis>=5.6.0"],
     extras_require={},
-    install_requires=[],
+    install_requires=["numpy>=1.0.0", "pyyaml>=5.0.0", "xxhash>=1.1.0"],
     package_data={"": ["README.md"], "judo": ["judo/config.yml"]},
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -34,7 +34,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Libraries",

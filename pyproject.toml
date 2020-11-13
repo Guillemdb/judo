@@ -6,7 +6,7 @@
 # Example configuration for Black.
 [tool.black]
 line-length = 99
-target-version = ['py34','py35','py36', 'py37', 'py38']
+target-version = ['py37', 'py38']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -81,4 +81,4 @@ enable = """,
          """
 
 [build-system]
-requires = ["setuptools >= 50.3.2", "wheel", "importlib"]
+requires = ["setuptools >= 50.3.2", "wheel"]
