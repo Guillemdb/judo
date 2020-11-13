@@ -1,6 +1,5 @@
 """Functionality for running fragile in numpy and pytorch."""
 import sys
-from typing import Union
 
 import numpy
 from judo.judo_backend import Backend, torch
@@ -20,11 +19,6 @@ from judo.judo_tensor import (
 from judo.functions.api import API, AVAILABLE_FUNCTIONS
 from judo.functions.hashing import hasher
 from judo.functions.random import random_state
-
-Tensor = Union[numpy.ndarray, torch.Tensor]
-Vector = Union[numpy.ndarray, torch.Tensor]
-Matrix = Union[numpy.ndarray, torch.Tensor]
-Scalar = Union[int, float]
 
 
 def __base_getattr(name):

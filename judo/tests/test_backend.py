@@ -21,11 +21,11 @@ class TestBackend:
         backend.set_backend(device="cuda")
         assert backend.get_device() == "cuda"
 
-        assert not backend.use_grad()
-        backend.set_backend(use_grad=True)
-        assert backend.use_grad()
+        assert not backend.requires_grad()
+        backend.set_backend(requires_grad=True)
+        assert backend.requires_grad()
 
         backend.reset_state()
         assert backend.is_numpy()
         assert backend.get_device() == "cpu"
-        assert not backend.use_grad()
+        assert not backend.requires_grad()

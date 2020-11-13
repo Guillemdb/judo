@@ -25,7 +25,7 @@ except ImportError:
 
 FALLBACK_DEFAULTS = {
     "backend": "numpy",
-    "device": "auto",
+    "device": "cpu",
     "requires_grad": None,
     "true_hash": True,
     "copy": False,
@@ -40,7 +40,7 @@ def load_backend_config(filepath=config_file):
     device = config.get("device", FALLBACK_DEFAULTS["device"])
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
-    elif device.lower() == "none":
+    elif str(device).lower() == "none":
         device = None
     requires_grad = config.get("requires_grad", FALLBACK_DEFAULTS["requires_grad"])
     true_hash = config.get("true_hash", FALLBACK_DEFAULTS["true_hash"])
