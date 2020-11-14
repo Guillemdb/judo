@@ -20,6 +20,8 @@ from judo.judo_tensor import (
 from judo.functions.api import API, AVAILABLE_FUNCTIONS
 from judo.functions.hashing import hasher
 from judo.functions.random import random_state
+from judo.states import States
+from judo.tree import HistoryTree
 
 
 def __base_getattr(name):

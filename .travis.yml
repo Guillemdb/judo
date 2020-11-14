@@ -60,6 +60,7 @@ matrix:
       install:
         - git config --global user.name "fragile-bot"
         - git config --global user.email "bot@fragile.tech"
+        - git config --global pull.rebase false
         - pip install bump2version
       script:
         - set -e
