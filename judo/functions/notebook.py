@@ -1,3 +1,6 @@
+AVAILABLE_FUNCTIONS = {"running_in_ipython", "remove_notebook_margin"}
+
+
 def running_in_ipython() -> bool:
     """Return ``True`` if the code is this function is being called from an IPython kernel."""
     try:

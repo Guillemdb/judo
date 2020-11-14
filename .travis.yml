@@ -25,7 +25,7 @@ _coverage: &_coverage
   - coverage run --concurrency=multiprocessing -m pytest .
   - travis_retry coverage combine
 _is_version_bump_commit: &_is_version_bump_commit
-  - branch == master AND type != pull_request AND commit_message !~ /^Bump version/
+  - branch == main AND type != pull_request AND commit_message !~ /^Bump version/
 _is_tag_commit: &_is_tag_commit
   - tag =~ .*
 matrix:
@@ -60,15 +60,16 @@ matrix:
       install:
         - git config --global user.name "fragile-bot"
         - git config --global user.email "bot@fragile.tech"
+        - git config --global pull.rebase false
         - pip install bump2version
       script:
         - set -e
-        - git pull --no-edit origin master
+        - git pull --no-edit origin main
         - version_file=judo/version.py
         - current_version=$(grep __version__ $version_file | cut -d\" -f2)
         - bumpversion --tag --current-version $current_version --commit patch $version_file
         - git remote add fragile-bot-remote https://fragile-bot:${GITHUB_TOKEN}@github.com/$TRAVIS_REPO_SLUG
-        - git push --tags fragile-bot-remote HEAD:master
+        - git push --tags fragile-bot-remote HEAD:main
         - set +e
     - stage: deploy
       name: Pypi deploy

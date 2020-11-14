@@ -2,7 +2,7 @@ from collections.abc import Iterable as _Iterable
 from typing import Iterable, Optional, Tuple, Union
 
 import judo
-from judo import tensor
+from judo.judo_tensor import tensor
 from judo.typing import Scalar, Tensor
 import numpy
 

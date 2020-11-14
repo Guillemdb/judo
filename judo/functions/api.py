@@ -21,7 +21,10 @@ AVAILABLE_FUNCTIONS = set(
         "logical_or",
         "logical_and",
     ]
+    + list(functions.batching.AVAILABLE_FUNCTIONS)
     + list(functions.fractalai.AVAILABLE_FUNCTIONS)
+    + list(functions.images.AVAILABLE_FUNCTIONS)
+    + list(functions.notebook.AVAILABLE_FUNCTIONS)
 )
 
 
@@ -33,6 +36,12 @@ class MetaAPI(type):
     def get_function(name):
         if name in functions.fractalai.AVAILABLE_FUNCTIONS:
             return getattr(functions.fractalai, name)
+        elif name in functions.batching.AVAILABLE_FUNCTIONS:
+            return getattr(functions.batching, name)
+        elif name in functions.images.AVAILABLE_FUNCTIONS:
+            return getattr(functions.images, name)
+        elif name in functions.notebook.AVAILABLE_FUNCTIONS:
+            return getattr(functions.notebook, name)
         elif Backend.is_numpy():
             backend = functions.numpy
         else:
