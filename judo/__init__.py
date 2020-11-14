@@ -4,6 +4,7 @@ import sys
 import numpy
 from judo.judo_backend import Backend, torch
 from judo import data_types as _data_types
+from judo.bounds import Bounds
 from judo.data_types import DATA_TYPE_NAMES, dtype, typing
 from judo.judo_tensor import (
     array,
