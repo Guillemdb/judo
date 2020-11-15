@@ -1,8 +1,9 @@
 from typing import Dict, Generator, Tuple, Union
 
+import numpy
+
 import judo
 from judo.typing import Tensor
-import numpy
 
 AVAILABLE_FUNCTIONS = {
     "similiar_chunks_indexes",

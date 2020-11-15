@@ -1,8 +1,8 @@
 import networkx
-import judo
 import pytest
 
-from judo.tree import NetworkxTree, HistoryTree, to_node_id
+import judo
+from judo.data_structures.tree import HistoryTree, NetworkxTree, to_node_id
 
 
 def random_powerlaw():

@@ -182,7 +182,3 @@ class MetaTyping(type):
             return Union[self.float, self.int]
         except Exception:
             return Union[_int, float]
-
-
-class typing(metaclass=MetaTyping):
-    Tensor = Union[numpy.ndarray, torch.Tensor]

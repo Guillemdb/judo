@@ -2,10 +2,14 @@
 import sys
 
 import numpy
-from judo.judo_backend import Backend, torch
+
 from judo import data_types as _data_types
-from judo.bounds import Bounds
-from judo.data_types import DATA_TYPE_NAMES, dtype, typing
+from judo.data_structures import Bounds, HistoryTree, States
+from judo.data_types import DATA_TYPE_NAMES, dtype
+from judo.functions.api import API, AVAILABLE_FUNCTIONS
+from judo.functions.hashing import hasher
+from judo.functions.random import random_state
+from judo.judo_backend import Backend, torch
 from judo.judo_tensor import (
     array,
     as_tensor,
@@ -17,11 +21,6 @@ from judo.judo_tensor import (
     to_numpy,
     to_torch,
 )
-from judo.functions.api import API, AVAILABLE_FUNCTIONS
-from judo.functions.hashing import hasher
-from judo.functions.random import random_state
-from judo.states import States
-from judo.tree import HistoryTree
 
 
 def __base_getattr(name):
