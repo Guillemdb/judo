@@ -31,10 +31,9 @@ class ReplayMemory:
         self.names = names
         self.reset()
 
-    def __len__(self):
-        if getattr(self, self.names[0]) is None:
-            return 0
-        return len(getattr(self, self.names[0]))
+    def __len__(self) -> int:
+        first_attr = getattr(self, self.names[0])
+        return 0 if first_attr is None else len(first_attr)
 
     def __repr__(self) -> str:
         text = "Memory with min_size %s max_size %s and length %s" % (
