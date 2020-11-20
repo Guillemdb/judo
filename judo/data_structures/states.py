@@ -5,7 +5,8 @@ from typing import Dict, Generator, Iterable, List, Optional, Tuple, Union
 import numpy
 
 import judo
-from judo import hasher, tensor
+from judo.functions.hashing import hasher
+from judo.judo_tensor import tensor
 from judo.typing import StateDict, Tensor
 
 

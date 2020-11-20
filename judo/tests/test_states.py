@@ -1,9 +1,7 @@
-import judo
-from judo import tensor
 import pytest
 
-
-from judo.states import States
+import judo
+from judo.data_structures.states import States
 
 
 states_classes = [States]

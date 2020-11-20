@@ -47,11 +47,11 @@ max_line_length = 99
 show_source = true
 inline_quotes='"'
 import_order_style = "appnexus"
-application_package_names = ["fragile"]
-application_import_names = ["fragile"]
+application_package_names = ["judo"]
+application_import_names = ["judo"]
 
 [tool.flakehell.plugins]
-flake8-quotes = ["-Q000"]
+'flake8*' = ["+*", "-D*"]
 pycodestyle = ["+*" ,"-B008","-B301","-C815","-C816","-C812","-D100",
     "-D105","-D200","-D202","-D301","-D402","-E121","-E123","-E126","-E203","-E226",
     "-E24","-E704","-F821","-W503","-W504"]

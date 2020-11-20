@@ -3,9 +3,10 @@ from typing import Callable
 import numpy
 
 import judo
-from judo.data_types import dtype, typing
-from judo.judo_tensor import tensor
+from judo.data_types import dtype
 from judo.functions.random import random_state
+from judo.judo_tensor import tensor
+from judo.typing import Tensor
 
 
 AVAILABLE_FUNCTIONS = {
@@ -22,12 +23,12 @@ AVAILABLE_FUNCTIONS = {
 }
 
 
-def l2_norm(x: typing.Tensor, y: typing.Tensor) -> typing.Tensor:
+def l2_norm(x: Tensor, y: Tensor) -> Tensor:
     """Euclidean distance between two batches of points stacked across the first dimension."""
     return judo.norm(x - y, axis=1)
 
 
-def relativize(x: typing.Tensor) -> typing.Tensor:
+def relativize(x: Tensor) -> Tensor:
     """Normalize the data using a custom smoothing technique."""
     orig = x
     x = judo.astype(x, dtype.float)
@@ -42,7 +43,7 @@ def relativize(x: typing.Tensor) -> typing.Tensor:
     return res
 
 
-def get_alive_indexes(oobs: typing.Tensor):
+def get_alive_indexes(oobs: Tensor):
     """Get indexes representing random alive walkers given a vector of death conditions."""
     if judo.all(oobs):
         return judo.arange(len(oobs))
@@ -51,11 +52,11 @@ def get_alive_indexes(oobs: typing.Tensor):
 
 
 def calculate_distance(
-    observs: typing.Tensor,
+    observs: Tensor,
     distance_function: Callable = l2_norm,
     return_compas: bool = False,
-    oobs: typing.Tensor = None,
-    compas: typing.Tensor = None,
+    oobs: Tensor = None,
+    compas: Tensor = None,
 ):
     """Calculate a distance metric for each walker with respect to a random companion."""
     if compas is None:
@@ -68,12 +69,12 @@ def calculate_distance(
 
 
 def calculate_virtual_reward(
-    observs: typing.Tensor,
-    rewards: typing.Tensor,
-    oobs: typing.Tensor = None,
+    observs: Tensor,
+    rewards: Tensor,
+    oobs: Tensor = None,
     dist_coef: float = 1.0,
     reward_coef: float = 1.0,
-    other_reward: typing.Tensor = 1.0,
+    other_reward: Tensor = 1.0,
     return_compas: bool = False,
     distance_function: Callable = l2_norm,
 ):
@@ -91,7 +92,7 @@ def calculate_virtual_reward(
     return virtual_reward.flatten() if not return_compas else (virtual_reward.flatten(), compas)
 
 
-def calculate_clone(virtual_rewards: typing.Tensor, oobs: typing.Tensor = None, eps=1e-3):
+def calculate_clone(virtual_rewards: Tensor, oobs: Tensor = None, eps=1e-3):
     """Calculate the clone indexes and masks from the virtual rewards."""
     compas_ix = get_alive_indexes(oobs) if oobs is not None else judo.arange(len(virtual_rewards))
     compas_ix = random_state.permutation(compas_ix)
@@ -102,13 +103,13 @@ def calculate_clone(virtual_rewards: typing.Tensor, oobs: typing.Tensor = None, 
 
 
 def fai_iteration(
-    observs: typing.Tensor,
-    rewards: typing.Tensor,
-    oobs: typing.Tensor = None,
+    observs: Tensor,
+    rewards: Tensor,
+    oobs: Tensor = None,
     dist_coef: float = 1.0,
     reward_coef: float = 1.0,
     eps=1e-8,
-    other_reward: typing.Tensor = 1.0,
+    other_reward: Tensor = 1.0,
 ):
     """Perform a FAI iteration."""
     oobs = oobs if oobs is not None else judo.zeros(rewards.shape, dtype=dtype.bool)
@@ -125,10 +126,10 @@ def fai_iteration(
 
 
 def cross_virtual_reward(
-    host_observs: typing.Tensor,
-    host_rewards: typing.Tensor,
-    ext_observs: typing.Tensor,
-    ext_rewards: typing.Tensor,
+    host_observs: Tensor,
+    host_rewards: Tensor,
+    ext_observs: Tensor,
+    ext_rewards: Tensor,
     dist_coef: float = 1.0,
     reward_coef: float = 1.0,
     return_compas: bool = False,
@@ -157,10 +158,7 @@ def cross_virtual_reward(
 
 
 def cross_clone(
-    host_virtual_rewards: typing.Tensor,
-    ext_virtual_rewards: typing.Tensor,
-    host_oobs: typing.Tensor = None,
-    eps=1e-3,
+    host_virtual_rewards: Tensor, ext_virtual_rewards: Tensor, host_oobs: Tensor = None, eps=1e-3,
 ):
     """Perform a clone operation between two different groups of points."""
     compas_ix = random_state.permutation(judo.arange(len(ext_virtual_rewards)))
@@ -176,11 +174,11 @@ def cross_clone(
 
 
 def cross_fai_iteration(
-    host_observs: typing.Tensor,
-    host_rewards: typing.Tensor,
-    ext_observs: typing.Tensor,
-    ext_rewards: typing.Tensor,
-    host_oobs: typing.Tensor = None,
+    host_observs: Tensor,
+    host_rewards: Tensor,
+    ext_observs: Tensor,
+    ext_rewards: Tensor,
+    host_oobs: Tensor = None,
     dist_coef: float = 1.0,
     reward_coef: float = 1.0,
     distance_function: Callable = l2_norm,

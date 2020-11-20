@@ -1,6 +1,6 @@
-from judo.judo_backend import torch
 from judo.data_types import dtype
-from judo.judo_tensor import tensor, astype
+from judo.judo_backend import torch
+from judo.judo_tensor import astype, tensor
 
 AVAILABLE_FUNCTIONS = [
     "argmax",
@@ -42,24 +42,6 @@ def clip(x, a_min, a_max, out=None):
 
     _tensor = min(x, other=astype(tensor(a_max), dtype=x.dtype))
     return max(_tensor, other=astype(tensor(a_min), dtype=x.dtype), out=out)
-
-    _tensor = torch.zeros_like(x)
-    if dtype.is_tensor(a_min) and not dtype.is_tensor(a_max):
-        for i, x_row in enumerate(a_min):
-            _tensor[:, i] = torch.clamp(x[:, i], x_row, a_max)
-    elif not dtype.is_tensor(a_min) and dtype.is_tensor(a_max):
-        for i, x_row in enumerate(a_max):
-            _tensor[:, i] = torch.clamp(x[:, i], a_min, x_row)
-    elif dtype.is_tensor(a_min) and dtype.is_tensor(a_max):
-        try:  # clamp one dimensional array
-            for i, (x_row, y_row) in enumerate(zip(a_min, a_max)):
-                _tensor[:, i] = torch.clamp(x[:, i], x_row, y_row)
-        except TypeError:  # clamp matrices
-            _tensor = torch.where(x > a_min, x, a_min)
-            _tensor = torch.where(_tensor < a_max, x, a_max)
-    else:
-        _tensor = torch.clamp(_tensor, a_min, a_max, out=out)
-    return _tensor
 
 
 def repeat(x, repeat, axis=None, dim=None):

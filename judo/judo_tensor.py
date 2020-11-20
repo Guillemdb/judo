@@ -1,11 +1,13 @@
 from typing import Callable
+
 import numpy
 
+from judo.data_types import dtype
 from judo.judo_backend import Backend, torch
-from judo.data_types import dtype, typing
+from judo.typing import Tensor
 
 
-def to_backend_wrap(func) -> Callable[..., typing.Tensor]:
+def to_backend_wrap(func) -> Callable[..., Tensor]:
     def wrapped(*args, **kwargs):
         return to_backend(func(*args, **kwargs))
 
@@ -159,8 +161,8 @@ def update_with_backend_values(**kwargs):
 
 
 def to_backend(
-    x: "typing.Tensor", requires_grad: bool = None, device: str = None, copy: bool = None
-) -> typing.Tensor:
+    x: "Tensor", requires_grad: bool = None, device: str = None, copy: bool = None
+) -> Tensor:
     kwargs = update_with_backend_values(requires_grad=requires_grad, device=device, copy=copy)
     if Backend.is_numpy():
         return to_numpy(x, kwargs.get("copy"))
@@ -172,7 +174,7 @@ def to_backend(
     )
 
 
-def match_backend(x, other) -> typing.Tensor:
+def match_backend(x, other) -> Tensor:
     if isinstance(x, numpy.ndarray):
         return to_numpy(other)
     elif isinstance(x, torch.Tensor):
@@ -188,7 +190,7 @@ class JudoTensor:
         requires_grad: bool = None,
         copy: bool = None,
         pin_memory: bool = False,
-    ) -> typing.Tensor:
+    ) -> Tensor:
         return new_backend_tensor(
             x,
             requires_grad=requires_grad,

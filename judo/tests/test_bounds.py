@@ -3,7 +3,7 @@ import pytest
 
 import judo
 from judo import tensor
-from judo.bounds import Bounds
+from judo.data_structures.bounds import Bounds
 
 
 def create_bounds(name):

@@ -1,8 +1,8 @@
 import numpy
 
 from judo.judo_backend import Backend, torch
-from judo.data_types import typing
 from judo.judo_tensor import to_backend
+from judo.typing import Scalar
 
 
 class MetaTorchRandomState(type):
@@ -12,7 +12,7 @@ class MetaTorchRandomState(type):
 
 
 class TorchRandomState(metaclass=MetaTorchRandomState):
-    def __init__(self, seed: typing.Scalar):
+    def __init__(self, seed: Scalar):
         numpy.random.seed(seed)
         torch.random.manual_seed(int(seed))
 
@@ -92,7 +92,7 @@ class RandomState(metaclass=MetaRandomState):
     _torch_random_state = TorchRandomState(seed=_random_seed)
 
     @classmethod
-    def seed(cls, seed: typing.Scalar = _random_seed):
+    def seed(cls, seed: Scalar = _random_seed):
         cls._numpy_random_state = numpy.random.RandomState(seed=seed)
         cls._torch_random_state = TorchRandomState(seed=seed)
 

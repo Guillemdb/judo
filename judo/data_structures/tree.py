@@ -4,7 +4,9 @@ from typing import Any, Dict, Generator, List, Set, Tuple, Union
 import networkx as nx
 
 import judo
-from judo import Backend, hasher, random_state, States
+from judo.data_structures import States
+from judo.functions import hasher, random_state
+from judo.judo_backend import Backend
 from judo.typing import NamesData, NodeData, NodeDataGenerator, NodeId, Tensor
 
 
